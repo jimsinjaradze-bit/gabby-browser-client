@@ -1,0 +1,8 @@
+{
+  "name": "gabby-browser-client",
+  "compatibility_date": "2026-07-01",
+  "assets": {
+    "directory": "./dist/gabby-browser-client/browser",
+    "not_found_handling": "single-page-application"
+  }
+}
