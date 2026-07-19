@@ -1,0 +1,32 @@
+<form class="connect-form" (submit)="connect($event)">
+  <label>
+    <span>callsign</span>
+    <input
+      name="name"
+      placeholder="e.g. alice"
+      autocomplete="off"
+      [value]="name()"
+      (input)="name.set($any($event.target).value)"
+      [disabled]="client.connectionState() !== 'disconnected'"
+    />
+  </label>
+
+  @if (client.connectionState() === 'disconnected') {
+    <button type="submit">Connect</button>
+  } @else {
+    <button type="button" class="secondary" (click)="client.disconnect()">Disconnect</button>
+  }
+
+  <span
+    class="status"
+    [class.connected]="client.connectionState() === 'connected'"
+    [class.connecting]="client.connectionState() === 'connecting'"
+  >
+    <span class="dot" aria-hidden="true"></span>
+    {{ statusLabel() }}
+  </span>
+</form>
+
+@if (client.lastError()) {
+  <p class="error">{{ client.lastError() }}</p>
+}

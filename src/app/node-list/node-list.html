@@ -1,0 +1,43 @@
+<section>
+  <h2>On the wire</h2>
+
+  @if (client.connectionState() !== 'connected') {
+    <p class="hint">Off air. Connect to see who's around.</p>
+  } @else if (client.peers().length === 0) {
+    <p class="hint">No one else on the wire yet.</p>
+  } @else {
+    <ul class="peers">
+      @for (peer of client.peers(); track peer.name) {
+        <li class="peer" animate.enter="fly-in" animate.leave="fly-out">
+          <div class="peer-head">
+            <span class="avatar" aria-hidden="true">{{ critterFor(peer.name) }}</span>
+            <span class="peer-name">{{ peer.name }}</span>
+            <span class="joined">joined {{ peer.joinedAt | date: 'shortTime' }}</span>
+          </div>
+          <div class="peer-actions">
+            <label class="file-pick">
+              <input type="file" hidden (change)="onFilePicked(peer.name, $event)" />
+              Pick a file
+            </label>
+            <button
+              (click)="send(peer.name)"
+              [disabled]="!selectedFiles()[peer.name] || !client.canRequestTransfer(peer.name)"
+            >
+              Send ✈
+            </button>
+          </div>
+          @if (selectedFiles()[peer.name]; as file) {
+            <p class="hint picked">{{ file.name }} · {{ formatBytes(file.size) }}</p>
+          }
+          @if (!client.canRequestTransfer(peer.name)) {
+            <p class="hint warn">A pending request blocks new transfers with this peer.</p>
+          }
+        </li>
+      }
+    </ul>
+  }
+
+  @if (fileError()) {
+    <p class="error">{{ fileError() }}</p>
+  }
+</section>

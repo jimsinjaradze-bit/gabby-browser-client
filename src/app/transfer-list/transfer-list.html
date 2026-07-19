@@ -1,0 +1,64 @@
+<section>
+  <h2>In flight</h2>
+
+  @if (client.transferViews().length === 0) {
+    <p class="hint">Nothing in flight. Pick a peer and toss them a file.</p>
+  } @else {
+    <ul class="transfers">
+      @for (view of client.transferViews(); track view.dto.id) {
+        <li class="transfer" [class.incoming]="view.direction === 'incoming'">
+          <div class="row">
+            <span class="dir">
+              @if (view.direction === 'outgoing') {
+                → {{ critterFor(view.dto.to) }} {{ view.dto.to }}
+              } @else {
+                ← {{ critterFor(view.dto.from) }} {{ view.dto.from }}
+              }
+            </span>
+            <span class="file" [title]="view.dto.fileMeta.name">
+              {{ view.dto.fileMeta.name }}
+              <small>({{ formatBytes(view.dto.fileMeta.sizeInBytes) }})</small>
+            </span>
+            <span class="chip" [class]="'chip phase-' + view.phase">{{ phaseLabel(view) }}</span>
+          </div>
+
+          @if (showProgress(view)) {
+            <div class="flight">
+              <div class="path">
+                <div class="trail" [style.width.%]="view.progressPct"></div>
+                <span class="plane" [style.left.%]="view.progressPct" aria-hidden="true">
+                  {{ view.phase === 'done' ? '🎉' : '✈️' }}
+                </span>
+              </div>
+              <span class="progress-text">
+                {{ formatBytes(view.progressBytes) }} /
+                {{ formatBytes(view.dto.fileMeta.sizeInBytes) }}
+              </span>
+            </div>
+          }
+
+          @if (view.direction === 'incoming' && (view.phase === 'awaiting-accept' || view.phase === 'expired')) {
+            <div class="actions">
+              @if (view.phase === 'awaiting-accept') {
+                <button (click)="client.accept(view.dto.id)">
+                  Accept ({{ view.secondsLeft }}s)
+                </button>
+              }
+              <button class="secondary" (click)="client.reject(view.dto.id)">Reject</button>
+            </div>
+          }
+
+          @if (view.direction === 'outgoing' && view.phase === 'expired') {
+            <p class="hint warn">
+              Request expired. The peer must reject it before new transfers can start.
+            </p>
+          }
+
+          @if (view.failureReason) {
+            <p class="error">{{ view.failureReason }}</p>
+          }
+        </li>
+      }
+    </ul>
+  }
+</section>

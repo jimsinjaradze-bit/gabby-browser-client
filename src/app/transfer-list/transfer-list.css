@@ -1,0 +1,146 @@
+.transfers {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.transfer {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.9rem;
+  padding: 0.9rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.dir {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--coral);
+  white-space: nowrap;
+}
+
+.transfer.incoming .dir {
+  color: var(--mint);
+}
+
+.file {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file small {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.chip {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: var(--surface-3);
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.chip.phase-done {
+  background: var(--mint-bg);
+  color: var(--mint);
+}
+
+.chip.phase-failed,
+.chip.phase-rejected {
+  background: var(--err-bg);
+  color: var(--err);
+}
+
+.chip.phase-sending,
+.chip.phase-receiving {
+  background: var(--coral-bg);
+  color: var(--coral);
+}
+
+.transfer.incoming .chip.phase-receiving {
+  background: var(--mint-bg);
+  color: var(--mint);
+}
+
+.chip.phase-expired,
+.chip.phase-awaiting-accept {
+  background: var(--amber-bg);
+  color: var(--amber);
+}
+
+/* the flight path: dashed route with a plane at progress % */
+.flight {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.5rem 0 0.15rem;
+}
+
+.path {
+  position: relative;
+  flex: 1;
+  height: 0;
+  border-bottom: 2px dashed var(--border);
+}
+
+.trail {
+  position: absolute;
+  left: 0;
+  top: -1px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--coral));
+  max-width: 100%;
+}
+
+.transfer.incoming .trail {
+  background: linear-gradient(90deg, transparent, var(--mint));
+}
+
+.plane {
+  position: absolute;
+  top: -0.75em;
+  transform: translateX(-55%);
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .plane {
+    transition: left 0.25s linear;
+  }
+}
+
+.progress-text {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.warn {
+  color: var(--amber);
+}

@@ -1,1 +1,125 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --bg: #141126;
+  --bg-dot: #241e40;
+  --surface: #1c1834;
+  --surface-2: #252044;
+  --surface-3: #302a56;
+  --border: #3b3364;
+  --text: #eeeaff;
+  --muted: #a79dcf;
+
+  --amber: #ffb444;
+  --amber-ink: #2b1c05;
+  --coral: #ff7d9d;
+  --mint: #5ce6b8;
+  --err: #ff6d6d;
+
+  --amber-bg: color-mix(in oklab, var(--amber) 16%, transparent);
+  --coral-bg: color-mix(in oklab, var(--coral) 16%, transparent);
+  --mint-bg: color-mix(in oklab, var(--mint) 14%, transparent);
+  --err-bg: color-mix(in oklab, var(--err) 16%, transparent);
+
+  --font-display: 'Bricolage Grotesque', 'Avenir Next', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
+  --font-body: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  background:
+    radial-gradient(circle at 50% -20%, #241d47 0%, transparent 60%),
+    radial-gradient(var(--bg-dot) 1px, transparent 1.5px) 0 0 / 26px 26px,
+    var(--bg);
+  min-height: 100vh;
+}
+
+h2 {
+  margin: 0 0 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--muted);
+}
+
+button {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.5rem 1.1rem;
+  border-radius: 999px;
+  border: none;
+  background: var(--amber);
+  color: var(--amber-ink);
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  button {
+    transition: transform 0.12s ease, filter 0.12s ease;
+  }
+
+  button:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+button.secondary {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+input {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: 0.6rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+}
+
+input::placeholder {
+  color: color-mix(in oklab, var(--muted) 60%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+input:focus-visible {
+  outline-offset: -1px;
+}
+
+.hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.error {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: var(--err);
+}
