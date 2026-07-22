@@ -1,9 +1,11 @@
 import { Injectable, OnDestroy, computed, signal } from '@angular/core';
 import {
+  CHUNK_DATA_SIZE,
   ClientCommand,
   ClientCommandType,
   MAX_FILE_SIZE,
   NodeDto,
+  PolicyDto,
   ServerMessage,
   TransferDto,
 } from './protocol';
@@ -64,6 +66,8 @@ export class GabbyClientService implements OnDestroy {
   private readonly sendingIds = new Set<string>();
   /** Relayed frames carry no transfer id, so only one incoming stream can be active. */
   private activeReceiver: { dto: TransferDto; receiver: FileReceiver } | null = null;
+  /** Server-negotiated outgoing chunk size; falls back to the default until POLICY arrives. */
+  private chunkSizeInBytes = CHUNK_DATA_SIZE;
 
   private download: (blob: Blob, fileName: string) => void = triggerDownload;
 
@@ -131,6 +135,7 @@ export class GabbyClientService implements OnDestroy {
     ws.onopen = () => {
       this.connectionState.set('connected');
       this.startTicker();
+      this.sendCommand('GET_POLICY', null);
     };
     ws.onmessage = (event) => this.onMessage(event);
     ws.onclose = (event) => this.onClose(event);
@@ -220,6 +225,16 @@ export class GabbyClientService implements OnDestroy {
       case 'TRANSFER_LIST':
         this.onTransferList(message.payload as TransferDto[]);
         break;
+      case 'POLICY':
+        this.onPolicy(message.payload as PolicyDto);
+        break;
+    }
+  }
+
+  private onPolicy(policy: PolicyDto): void {
+    const size = policy?.maxChunkSizeInBytes;
+    if (typeof size === 'number' && size > 0) {
+      this.chunkSizeInBytes = size;
     }
   }
 
@@ -272,6 +287,7 @@ export class GabbyClientService implements OnDestroy {
       bufferedAmount: () => this.ws?.bufferedAmount ?? 0,
       onProgress: (sentBytes) => this.patchLocal(transfer.id, { progressBytes: sentBytes }),
       isAborted: () => this.connectionState() !== 'connected',
+      chunkSize: this.chunkSizeInBytes,
     })
       .then(async () => {
         while ((this.ws?.bufferedAmount ?? 0) > 0 && this.connectionState() === 'connected') {
@@ -398,6 +414,7 @@ export class GabbyClientService implements OnDestroy {
     this.filesByTransferId.clear();
     this.sendingIds.clear();
     this.activeReceiver = null;
+    this.chunkSizeInBytes = CHUNK_DATA_SIZE;
   }
 
   private teardownSocket(): void {

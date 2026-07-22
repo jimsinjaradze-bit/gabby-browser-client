@@ -17,6 +17,21 @@ label {
   min-width: 12rem;
 }
 
+@media (max-width: 30rem) {
+  .connect-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  label {
+    min-width: 0;
+  }
+
+  .status {
+    justify-content: center;
+  }
+}
+
 label span {
   font-family: var(--font-mono);
   font-size: 0.7rem;

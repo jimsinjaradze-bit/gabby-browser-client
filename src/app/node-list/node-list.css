@@ -14,6 +14,12 @@
   padding: 0.9rem 1.1rem;
 }
 
+@media (max-width: 26rem) {
+  .peer {
+    padding: 0.75rem 0.9rem;
+  }
+}
+
 /* node joins: final approach from the right, flare, touch down */
 @media (prefers-reduced-motion: no-preference) {
   .fly-in {
@@ -56,8 +62,9 @@
 
 .peer-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.6rem;
+  gap: 0.4rem 0.6rem;
   margin-bottom: 0.65rem;
 }
 
@@ -71,6 +78,10 @@
   font-family: var(--font-mono);
   font-weight: 600;
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .joined {
@@ -81,6 +92,7 @@
 
 .peer-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.6rem;
   align-items: center;
 }
@@ -101,6 +113,15 @@
 .file-pick:hover {
   border-color: var(--amber);
   color: var(--amber);
+}
+
+@media (pointer: coarse) {
+  .file-pick {
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.65rem 1.2rem;
+  }
 }
 
 .picked {

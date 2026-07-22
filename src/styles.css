@@ -39,6 +39,7 @@ body {
     radial-gradient(var(--bg-dot) 1px, transparent 1.5px) 0 0 / 26px 26px,
     var(--bg);
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 h2 {
@@ -122,4 +123,18 @@ input:focus-visible {
   margin: 0.5rem 0 0;
   font-size: 0.85rem;
   color: var(--err);
+}
+
+/* Touch devices: keep tap targets comfortable and stop iOS Safari from
+   zooming the viewport when an input smaller than 16px gains focus. */
+@media (pointer: coarse) {
+  button {
+    min-height: 2.75rem;
+    padding: 0.65rem 1.2rem;
+  }
+
+  input {
+    font-size: 16px;
+    min-height: 2.75rem;
+  }
 }

@@ -106,6 +106,20 @@ describe('sendFile', () => {
     expect(frames.length).toBe(1);
   });
 
+  it('honors a custom chunkSize', async () => {
+    const frames: ArrayBuffer[] = [];
+
+    await sendFile({
+      file: makeBlob(10),
+      send: (frame) => frames.push(frame),
+      bufferedAmount: () => 0,
+      onProgress: () => {},
+      chunkSize: 3,
+    });
+
+    expect(frames.map((f) => f.byteLength)).toEqual([3, 3, 3, 1]);
+  });
+
   it('sends nothing for an empty file', async () => {
     const frames: ArrayBuffer[] = [];
     await sendFile({

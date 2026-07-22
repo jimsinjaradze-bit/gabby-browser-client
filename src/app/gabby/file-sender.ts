@@ -9,6 +9,8 @@ export interface SendFileOptions {
   /** Pause sending while the socket buffer is above this. */
   highWaterMark?: number;
   drainDelayMs?: number;
+  /** Defaults to CHUNK_DATA_SIZE; pass the server's POLICY-negotiated size instead. */
+  chunkSize?: number;
 }
 
 const DEFAULT_HIGH_WATER_MARK = 1_000_000;
@@ -27,6 +29,7 @@ export async function sendFile(options: SendFileOptions): Promise<void> {
     file,
     highWaterMark = DEFAULT_HIGH_WATER_MARK,
     drainDelayMs = DEFAULT_DRAIN_DELAY_MS,
+    chunkSize = CHUNK_DATA_SIZE,
   } = options;
 
   let offset = 0;
@@ -41,7 +44,7 @@ export async function sendFile(options: SendFileOptions): Promise<void> {
       }
     }
 
-    const end = Math.min(offset + CHUNK_DATA_SIZE, file.size);
+    const end = Math.min(offset + chunkSize, file.size);
     options.send(await file.slice(offset, end).arrayBuffer());
 
     offset = end;

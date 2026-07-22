@@ -4,11 +4,13 @@
  */
 
 /**
- * The server relays whole binary frames and its websocket container caps a
- * binary frame at 65,536 bytes. Frames carry raw chunk data only: each client
- * has at most one active transfer, so the server resolves the transfer from
- * the sender alone. Kept below the cap because permessage-deflate can expand
- * incompressible chunks by a few bytes on the wire.
+ * Fallback chunk size used until the server's POLICY response arrives (or if
+ * it never does). The server relays whole binary frames and its websocket
+ * container caps a binary frame at 65,536 bytes; frames carry raw chunk data
+ * only since each client has at most one active transfer, so the server
+ * resolves the transfer from the sender alone. Kept below the cap because
+ * permessage-deflate can expand incompressible chunks by a few bytes on the
+ * wire.
  */
 export const CHUNK_DATA_SIZE = 63 * 1024;
 
@@ -19,9 +21,10 @@ export type ClientCommandType =
   | 'DEREGISTER'
   | 'SEND_PAYLOAD_REQ'
   | 'ACCEPT_PAYLOAD_REQ'
-  | 'REJECT_PAYLOAD_REQ';
+  | 'REJECT_PAYLOAD_REQ'
+  | 'GET_POLICY';
 
-export type ServerMessageType = 'NODE_LIST' | 'TRANSFER_LIST';
+export type ServerMessageType = 'NODE_LIST' | 'TRANSFER_LIST' | 'POLICY';
 
 export type TransferStatus =
   | 'REQUESTED'
@@ -68,4 +71,8 @@ export interface SendPayloadReq {
 
 export interface TransferActionReq {
   transferId: string;
+}
+
+export interface PolicyDto {
+  maxChunkSizeInBytes: number;
 }

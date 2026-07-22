@@ -105,6 +105,11 @@ describe('GabbyClientService', () => {
     expect(service.connectionState()).toBe('connected');
   });
 
+  it('requests the transfer policy as soon as the connection opens', () => {
+    const ws = connectAs('alice');
+    expect(ws.sentCommands()).toEqual([{ clientCommandType: 'GET_POLICY', payload: null }]);
+  });
+
   it('refuses to connect without a name', () => {
     service.connect('ws://localhost:8080/ws', '  ');
     expect(FakeWebSocket.instances.length).toBe(0);
@@ -131,6 +136,7 @@ describe('GabbyClientService', () => {
     service.sendFileRequest('bob', file);
 
     expect(ws.sentCommands()).toEqual([
+      { clientCommandType: 'GET_POLICY', payload: null },
       {
         clientCommandType: 'SEND_PAYLOAD_REQ',
         payload: {
@@ -147,6 +153,7 @@ describe('GabbyClientService', () => {
     service.reject(TRANSFER_ID);
 
     expect(ws.sentCommands()).toEqual([
+      { clientCommandType: 'GET_POLICY', payload: null },
       { clientCommandType: 'ACCEPT_PAYLOAD_REQ', payload: { transferId: TRANSFER_ID } },
       { clientCommandType: 'REJECT_PAYLOAD_REQ', payload: { transferId: TRANSFER_ID } },
     ]);
@@ -195,6 +202,40 @@ describe('GabbyClientService', () => {
       const view = service.transferViews().find((v) => v.dto.id === TRANSFER_ID)!;
       expect(view.phase).toBe('done');
     });
+  });
+
+  it('chunks outgoing transfers using the server-negotiated policy size', async () => {
+    const ws = connectAs('alice');
+    ws.simulateMessage(serverMessage('POLICY', { maxChunkSizeInBytes: 2 }));
+    const file = new File([new Uint8Array([9, 8, 7, 6])], 'notes.txt', { type: 'text/plain' });
+
+    service.sendFileRequest('bob', file);
+    ws.simulateMessage(serverMessage('TRANSFER_LIST', [transferDto()]));
+    ws.simulateMessage(serverMessage('TRANSFER_LIST', [transferDto({ status: 'ACCEPTED' })]));
+
+    await vi.waitFor(() => {
+      expect(ws.sent.filter((d) => d instanceof ArrayBuffer).length).toBe(2);
+    });
+
+    const frames = ws.sent.filter((d): d is ArrayBuffer => d instanceof ArrayBuffer);
+    expect(frames.map((f) => f.byteLength)).toEqual([2, 2]);
+  });
+
+  it('falls back to the default chunk size when POLICY omits a usable value', async () => {
+    const ws = connectAs('alice');
+    ws.simulateMessage(serverMessage('POLICY', { maxChunkSizeInBytes: null }));
+    const file = new File([new Uint8Array([9, 8, 7, 6])], 'notes.txt', { type: 'text/plain' });
+
+    service.sendFileRequest('bob', file);
+    ws.simulateMessage(serverMessage('TRANSFER_LIST', [transferDto()]));
+    ws.simulateMessage(serverMessage('TRANSFER_LIST', [transferDto({ status: 'ACCEPTED' })]));
+
+    await vi.waitFor(() => {
+      expect(ws.sent.some((d) => d instanceof ArrayBuffer)).toBe(true);
+    });
+
+    const frame = ws.sent.find((d): d is ArrayBuffer => d instanceof ArrayBuffer)!;
+    expect(frame.byteLength).toBe(4);
   });
 
   it('marks a transfer done when the server reports it completed', () => {
